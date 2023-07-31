@@ -121,16 +121,6 @@ def file_list_generator(sat_data_directory, granule_end_date):
     return file_name_list
 
 
-def get_raster_template(region,resolution):
-    raster_file_name='lib/raster_template_'+region+'_'+resolution+'.tif'
-    #current_path=os.path.realpath(__file__)
-    #current_dir=os.path.dirname(current_path)
-    #main_dir=os.path.dirname(current_dir)
-    #lib=os.path.join(main_dir,'lib')
-    #raster_path=os.path.join(lib,raster_file_name)
-    stream = pkg_resources.resource_stream(__name__, raster_file_name)
-    raster_template=rasterio.open(stream)
-    return raster_template
 
 def set_region(region):
     
@@ -179,20 +169,26 @@ def convert_to_raster(sat_data_directory, writing_directory, resolution_list, gr
     gdf=gdf.reset_index()
     if not gdf.empty:
         for res in resolution_list:
-            raster_template=converter.get_raster_template('130w60w20n55n',res)
-            new_raster_name=granule_end_date+'_'+res+'_'+str(qa_value_threshold)+'_raster.tif'
-            new_raster=os.path.join(writing_directory, new_raster_name)
+            
+            raster_file_name='lib/raster_templates/raster_template_'+'130w60w20n55n'+'_'+res+'.tif'
+            with pkg_resources.resource_stream(__name__, raster_file_name) as stream:
+                raster_template=rasterio.open(stream)
+            #raster_template=converter.get_raster_template('130w60w20n55n',res)
+                new_raster_name=granule_end_date+'_'+res+'_'+str(qa_value_threshold)+'_raster.tif'
+                new_raster=os.path.join(writing_directory, new_raster_name)
     
-            rasterized=converter.gdf_to_raster(gdf,raster_template, new_raster)
+                rasterized=converter.gdf_to_raster(gdf,raster_template, new_raster)
         
-   
+                raster_template.close()
+            
 
-
+    del df
+    del gdf
 
 def converter_run(read_directory,write_directory, granule_end_date, qa_value_threshold, df_print=False):
  
-    if df_print:
-            converter.convert_to_df(read_directory,write_directory,granule_end_date,write_to_file=True)
+    #if df_print:
+    #        converter.convert_to_df(read_directory,write_directory,granule_end_date,write_to_file=True)
         
     converter.convert_to_raster(read_directory,write_directory, ['005','010','025','050','100'], granule_end_date, qa_value_threshold)
 

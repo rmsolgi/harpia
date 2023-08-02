@@ -22,7 +22,10 @@ SOFTWARE.
 '''
 
 from . import converter
-
+from . import utils
+from . import cp_completion
+from . import kriging
+from . import imputation
 
 
 

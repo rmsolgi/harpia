@@ -11,13 +11,13 @@ import harpia.tropomi.no2 as hp
 import time
 import pickle
 
-def tensor_completion(rank,iteration,raster_directory,start_date,end_date,resolution,qa_value,added_missing_ratio, writing_directory=None):
-    random_indices_name="random_indices_"+start_date+'_'+end_date+'_'+resolution+'_'+qa_value+'_'+added_missing_ratio+'.npy'
+def tensor_completion(rank,iteration,raster_directory,start_date,end_date,resolution,qa_value,random_indices, writing_directory=None):
+    #random_indices_name="random_indices_"+start_date+'_'+end_date+'_'+resolution+'_'+qa_value+'_'+added_missing_ratio+'.npy'
     data, existed_dates, missed_dates=hp.utils.raster_to_array(raster_directory,start_date,end_date,resolution,qa_value)
     data=hp.utils.add_nans(data) #### nan values must be added before any change in the data values 
     data=hp.utils.molec_per_cm2(data)
     mask=hp.utils.make_mask(data)
-    random_indices=hp.utils.read_added_missing_indices(random_indices_name)
+    #random_indices=hp.utils.read_added_missing_indices(random_indices_name)
     mask[random_indices]=0
     raw_observations=data[random_indices]
     data_array=(data-np.nanmin(data))/(np.nanmax(data)-np.nanmin(data))
@@ -45,15 +45,15 @@ def tensor_completion(rank,iteration,raster_directory,start_date,end_date,resolu
         
     return results_dict
 
-def kriging(kriging_type,prediction_interval,raster_directory,start_date,end_date,resolution,qa_value,added_missing_ratio, writing_directory=None, partitioning=False, variogram_model='linear'):
+def kriging(kriging_type,prediction_interval,raster_directory,start_date,end_date,resolution,qa_value,random_indices, writing_directory=None, partitioning=False, variogram_model='linear'):
     
-    random_indices_name="random_indices_"+start_date+'_'+end_date+'_'+resolution+'_'+qa_value+'_'+added_missing_ratio+'.npy'
+    #random_indices_name="random_indices_"+start_date+'_'+end_date+'_'+resolution+'_'+qa_value+'_'+added_missing_ratio+'.npy'
     data, existed_dates, missed_dates=hp.utils.raster_to_array(raster_directory,start_date,end_date,resolution,qa_value)
     data=hp.utils.add_nans(data) #### nan values must be added before any change in the data values 
     data=hp.utils.molec_per_cm2(data)
     #mask=hp.utils.make_mask(data)  IT MUST NOT USE BECAUSE IT INCLUDE NAN VALUES TOO. 
     mask=np.ones(data.shape)
-    random_indices=hp.utils.read_added_missing_indices(random_indices_name)
+    #random_indices=hp.utils.read_added_missing_indices(random_indices_name)
     mask[random_indices]=0
     
     #cut data
@@ -94,15 +94,15 @@ def kriging(kriging_type,prediction_interval,raster_directory,start_date,end_dat
     return results_dict
 
 
-def custom_kriging(k_rows,k_cols,prediction_interval,raster_directory,start_date,end_date,resolution,qa_value,added_missing_ratio, writing_directory=None, kriging_type='ordinary', variogram_model='linear'):
+def custom_kriging(k_rows,k_cols,prediction_interval,raster_directory,start_date,end_date,resolution,qa_value,random_indices, writing_directory=None, kriging_type='ordinary', variogram_model='linear'):
     
-    random_indices_name="random_indices_"+start_date+'_'+end_date+'_'+resolution+'_'+qa_value+'_'+added_missing_ratio+'.npy'
+    #random_indices_name="random_indices_"+start_date+'_'+end_date+'_'+resolution+'_'+qa_value+'_'+added_missing_ratio+'.npy'
     data, existed_dates, missed_dates=hp.utils.raster_to_array(raster_directory,start_date,end_date,resolution,qa_value)
     data=hp.utils.add_nans(data) #### nan values must be added before any change in the data values 
     data=hp.utils.molec_per_cm2(data)
     #mask=hp.utils.make_mask(data)  IT MUST NOT USE BECAUSE IT INCLUDE NAN VALUES TOO. 
     mask=np.ones(data.shape)
-    random_indices=hp.utils.read_added_missing_indices(random_indices_name)
+    #random_indices=hp.utils.read_added_missing_indices(random_indices_name)
     mask[random_indices]=0
     
     #cut data

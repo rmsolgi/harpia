@@ -28,7 +28,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="harpia",
-    version="1.28",
+    version="1.31",
     author="Ryan Solgi",
     author_email="ryan.solgi@gmail.com",
     maintainer='Ryan Solgi',
@@ -45,8 +45,8 @@ setuptools.setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     install_requires=['numpy', 'datetime', 'netCDF4', 'pandas', 'geopandas', 'rasterio'],
-    include_package_data=True,
-    package_data={"harpia": ["tropomi/no2/lib/raster_templates/*.tif","tropomi/no2/lib/random_missing_indices/*.npy"]}
+    #include_package_data=True,
+    #package_data={"harpia": ["tropomi/no2/lib/raster_templates/*.tif"]}
     )
 
 

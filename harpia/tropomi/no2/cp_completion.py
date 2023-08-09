@@ -41,7 +41,7 @@ def cp_completion_als(tensor, samples, rank, iteration, cp_iteration=100, verbos
     log.append(error_ratio)
     
     if verbose:
-        print('Initilization is done')
+        print('Initialization is done')
         print('Error', error_ratio)
     
     for t in range(0,iteration):

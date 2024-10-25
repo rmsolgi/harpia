@@ -10,6 +10,41 @@ import os
 import harpia.tropomi.no2 as hp
 import time
 import pickle
+import tensorlearn as tl
+
+def low_rank_inquiry(rank_list,cp_iteration, raster_directory,start_date,end_date,resolution,qa_value, writing_directory=None, verbose=True):
+    data, existed_dates, missed_dates=hp.utils.raster_to_array(raster_directory,start_date,end_date,resolution,qa_value)
+    data=hp.utils.add_nans(data) #### nan values must be added before any change in the data values 
+    data=hp.utils.molec_per_cm2(data)
+    data_array=(data-np.nanmin(data))/(np.nanmax(data)-np.nanmin(data))
+    mask=hp.utils.make_mask(data)
+    data_array[np.where(np.isnan(data_array))]=0
+    projected_tensor=np.multiply(data_array,mask)
+    
+    norm_error_list=[]
+    data_norm=tl.tensor_frobenius_norm(data_array)
+    for rank in rank_list:
+        weights,factors=tl.cp_als_rand_init(projected_tensor, rank, cp_iteration)
+
+        tensor_hat=tl.cp_to_tensor(weights,factors)
+
+        error=tensor_hat-data_array
+
+        norm_error=tl.tensor_frobenius_norm(error)
+        norm_error_list.append(norm_error/data_norm)
+        if verbose: 
+            print('finished rank: ', rank)
+
+    results_dict={}
+    results_dict['ranks']=rank_list
+    results_dict['errors']=norm_error_list
+    if writing_directory!=None:
+        file_name="low_rank_inquiry"+start_date+'_'+end_date+'_'+resolution+'_'+qa_value+'.pickle'
+        writing_file=os.path.join(writing_directory, file_name)
+        with open(writing_file, 'wb') as file:
+            pickle.dump(results_dict,file)
+    return results_dict
+
 
 def tensor_completion(rank,iteration,raster_directory,start_date,end_date,resolution,qa_value,random_indices, added_missing_ratio, writing_directory=None):
     #random_indices_name="random_indices_"+start_date+'_'+end_date+'_'+resolution+'_'+qa_value+'_'+added_missing_ratio+'.npy'

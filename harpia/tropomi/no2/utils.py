@@ -136,7 +136,60 @@ def read_added_missing_indices(file_name):
         
     return random_indices
 
+##############################################################################
+##############################################################################
+##############################################################################
 
+
+def generate_cloud_indices(mask, number_of_days, threshold,max_iteration=100): #threshold refers to the ration of available values already existed
+    
+    
+    daily_ratio=[]
+    for day in range(0,mask.shape[0]):
+        daily_ratio.append(np.sum(mask[day,:,:])/(mask[day,:,:].size))
+    daily_ratio=np.array(daily_ratio)
+    above_threshold_indices=np.where(daily_ratio>=threshold)
+    #potential_count=len(above_threshold_indices[0])
+    pool=above_threshold_indices[0]
+    selected=[]
+    for i in range(number_of_days):
+       counter=0
+       condition=True
+       while condition:
+        counter+=1
+        rand_index_1=np.random.choice(len(pool))
+        rand_index_2=np.random.choice(len(pool))
+        missing_indices=np.where(mask[pool[rand_index_1],:,:]==0)
+        partial_day=mask[pool[rand_index_2],:,:][missing_indices]
+        #print(np.size(partial_day))
+        if rand_index_1!=rand_index_2 and np.size(partial_day)>0:
+            if ((np.sum(partial_day)/np.size(partial_day))==1):
+                #print(np.sum(partial_day)/np.size(partial_day))
+                
+                
+                size=len(missing_indices[0])
+                dim_0=[]
+                for t in range(size):
+                    dim_0.append(pool[rand_index_2])
+                dim_0=np.array(dim_0)
+                
+                daily_cloud_inidices=np.vstack([dim_0,missing_indices[0],missing_indices[1]])
+                
+                
+                selected.append(daily_cloud_inidices)
+                pool=np.delete(pool,rand_index_2)
+                condition=False
+
+       
+        
+        if counter>max_iteration:
+           condition=False
+           print('no match found number of generated indices may be less than requested')
+       
+    cloud_indices=tuple(np.hstack(selected))
+
+    
+    return cloud_indices
 
    
 ##############################################################################
@@ -175,4 +228,7 @@ def mean_absolute_percentage_error(observations,predictions):
 
 
 
-    
+##############################################################################
+##############################################################################
+##############################################################################
+
